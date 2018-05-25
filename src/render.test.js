@@ -7,7 +7,9 @@ import render, {
   renderTimestamp,
   renderSoftDelete,
   renderOperator,
-  renderComment
+  renderComment,
+  renderType,
+  renderTable
 } from './render'
 
 /**
@@ -260,155 +262,148 @@ test('should render null when operator be false', () => {
     null
   )
 })
-
+
 
 /**
- * schema
+ * Enum types
  */
 
-test('should render SQL string', () => {
+test('should render enum types', () => {
   expect(
-    render({
-      schema: 'api',
-      tables: [],
-      types: []
+    renderType({
+      name: 'foo',
+      enums: ['bar', 'baz']
     })
   ).toEqual(
-    `
-CREATE SCHEMA api IF NOT EXISTS;
-`
+    `\
+CREATE TYPE foo AS ENUM (
+  'bar', 'baz'
+);`
   )
 })
 
-test('should warning when tables was empty', () => {
-  console.warn = jest.fn
-  render({
-    schema: 'api',
-    tables: [],
-    types: []
+test('should render enum types without string type items', () => {
+  expect(
+    renderType({
+      name: 'foo',
+      enums: [1, 2]
+    })
+  ).toEqual(
+    `\
+CREATE TYPE foo AS ENUM (
+  1, 2
+);`
+  )
+})
+
+test('should warning when render enum types with blank enums', () => {
+  console.warn = jest.fn()
+  renderType({
+    name: 'foo',
+    enums: []
   })
   expect(
     console.warn
   ).toHaveBeenCalled()
 })
 
+test('should throw when type name or type not provied', () => {
+  expect(
+    () => renderType({
+
+    })
+  ).toThrow()
+
+  expect(
+    () => renderType({
+      name: 'foo'
+    })
+  ).toThrow()
+
+  expect(
+    () => renderType({
+      name: 'foo',
+      enums: 'bar'
+    })
+  ).toThrow()
+})
+
+
 /**
- * table
+ * tables
  */
-
-test('should render tables SQL strings', () => {
+test('should render table with empty columns', () => {
   expect(
-    render({
-      schema: 'api',
-      tables: [{
-        table: 'foo',
-        columns: []
-      }]
-    })
-  ).toEqual(
-    `
-CREATE SCHEMA api IF NOT EXISTS;
-
-CREATE TABLE api.foo IF NOT EXISTS (
-
-);
-`
-  )
-})
-
-test('should render tables columns SQL strings', () => {
-  expect(
-    render({
-      schema: 'api',
-      tables: [{
-        table: 'foo',
-        columns: [{
-          column: 'bar',
-          type: 'integer'
-        }]
-      }]
-    })
-  ).toEqual(
-    `
-CREATE SCHEMA api IF NOT EXISTS;
-
-CREATE TABLE api.foo IF NOT EXISTS (
-  id serial PRIMARY KEY,
-  bar integer NOT NULL
-);
-`
-  )
-})
-
-test('should render tables columns SQL strings without id column', () => {
-  expect(
-    render({
-      schema: 'api',
-      tables: [{
-        table: 'foo',
-        columns: [{
-          column: 'bar',
-          type: 'integer'
-        }]
-      }]
-    }, {
-      primaryColumn: false
-    })
-  ).toEqual(
-    `
-CREATE SCHEMA api IF NOT EXISTS;
-
-CREATE TABLE api.foo IF NOT EXISTS (
-  bar integer NOT NULL
-);
-`
-  )
-})
-
-test('should render tables columns SQL strings with additional columns', () => {
-  expect(
-    render({
-      schema: 'api',
-      tables: [{
-        table: 'foo',
-        columns: [{
-          column: 'bar',
-          type: 'integer'
-        }]
-      }]
-    }, {
-      additionalColumns: true
-    })
-  ).toEqual(
-    `
-CREATE SCHEMA api IF NOT EXISTS;
-
-CREATE TABLE api.foo IF NOT EXISTS (
-  id serial PRIMARY KEY,
-  bar integer NOT NULL,
-  create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  create_by serial NOT NULL DEFAULT 1,
-  update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  update_by serial NOT NULL DEFAULT 1,
-  delete_at timestamp DEFAULT NULL
-);
-`
-  )
-})
-
-test('should warning when table havn\'t any columns', () => {
-  console.warn = jest.fn
-  render({
-    schema: 'api',
-    tables: [{
-      table: 'foo',
+    renderTable({
+      name: 'foo',
       columns: []
-    }]
+    })
+  ).toEqual(
+    `CREATE TABLE foo IF NOT EXISTS ();`
+  )
+})
+
+test('should render table with column', () => {
+  expect(
+    renderTable({
+      name: 'foo',
+      columns: [{
+        name: 'bar',
+        type: 'integer'
+      }]
+    })
+  ).toEqual(
+    `\
+CREATE TABLE foo IF NOT EXISTS (
+  bar INTEGER
+);`
+  )
+})
+
+test('should render table with columns', () => {
+  expect(
+    renderTable({
+      name: 'foo',
+      columns: [{
+        name: 'bar',
+        type: 'integer'
+      },{
+        name: 'baz',
+        type: 'text'
+      }]
+    })
+  ).toEqual(
+    `\
+CREATE TABLE foo IF NOT EXISTS (
+  bar INTEGER,
+  baz TEXT
+);`
+  )
+})
+
+test('should warning when columns was empty', () => {
+  console.warn = jest.fn()
+  renderTable({
+    name: 'foo',
+    columns: []
   })
   expect(
     console.warn
   ).toHaveBeenCalled()
 })
+
+test('should throw when name or columns not provided', () => {
+  expect(
+    () => renderTable()
+  ).toThrow()
+
+  expect(
+    () => renderTable({
+      name: 'foo'
+    })
+  ).toThrow()
+})
+
 
 
 /**
@@ -423,7 +418,7 @@ test('should render comment', () => {
       content: 'baz'
     })
   ).toEqual(
-    `COMMENT ON foo bar IS 'baz';`
+    `COMMENT ON FOO bar IS 'baz';`
   )
 })
 
@@ -453,4 +448,213 @@ test('should warning when comment content was blank', () => {
   expect(
     console.warn
   ).toHaveBeenCalled()
+})
+
+
+/**
+ * all
+ */
+
+test('should render SQL strings', () => {
+  expect(
+    render({
+      schema: 'api',
+      metas: {
+        types: [{
+          name: 'foo',
+          enums: []
+        }]
+      }
+    })
+  ).toEqual(
+    `
+BEGIN;
+
+CREATE SCHEMA api IF NOT EXISTS;
+
+CREATE TYPE foo AS ENUM ();
+
+COMMIT;
+`
+  )
+
+  expect(
+    render({
+      schema: 'api',
+      metas: {
+        types: [{
+          name: 'foo',
+          enums: ['bar', 'baz']
+        }]
+      }
+    })
+  ).toEqual(
+    `
+BEGIN;
+
+CREATE SCHEMA api IF NOT EXISTS;
+
+CREATE TYPE foo AS ENUM (
+  'bar', 'baz'
+);
+
+COMMIT;
+`
+  )
+
+  expect(
+    render({
+      schema: 'api',
+      metas: {
+        tables: [{
+          name: 'foo',
+          columns: []
+        }]
+      }
+    })
+  ).toEqual(
+    `
+BEGIN;
+
+CREATE SCHEMA api IF NOT EXISTS;
+
+CREATE TABLE foo IF NOT EXISTS ();
+
+COMMIT;
+`
+  )
+
+  expect(
+    render({
+      schema: 'api',
+      metas: {
+        tables: [{
+          name: 'foo',
+          columns: [{
+            name: 'bar',
+            type: 'integer'
+          },{
+            name: 'baz',
+            type: 'text'
+          }]
+        }]
+      }
+    })
+  ).toEqual(
+    `
+BEGIN;
+
+CREATE SCHEMA api IF NOT EXISTS;
+
+CREATE TABLE foo IF NOT EXISTS (
+  bar INTEGER,
+  baz TEXT
+);
+
+COMMIT;
+`
+  )
+
+  expect(
+    render({
+      schema: 'api',
+      metas: {
+        types: [{
+          name: 'foo',
+          enums: []
+        }],
+        tables: [{
+          name: 'bar',
+          columns: []
+        }],
+        comments: [{
+          type: 'table',
+          target: 'baz',
+          content: 'qux'
+        }]
+      }
+    })
+  ).toEqual(
+    `
+BEGIN;
+
+CREATE SCHEMA api IF NOT EXISTS;
+
+CREATE TYPE foo AS ENUM ();
+
+CREATE TABLE bar IF NOT EXISTS ();
+
+COMMENT ON TABLE baz IS 'qux';
+
+COMMIT;
+`
+  )
+
+  expect(
+    render({
+      schema: 'api',
+      metas: {
+        types: [{
+          name: 'foo',
+          enums: ['foo1', 'foo2']
+        }],
+        tables: [{
+          name: 'bar',
+          columns: [{
+            name: 'bar1',
+            type: 'integer',
+            primaryKey: true
+          },{
+            name: 'bar2',
+            type: 'text',
+            nullable: true
+          }]
+        },{
+          name: 'barr',
+          columns: [{
+            name: 'barr1',
+            type: 'integer',
+            primaryKey: true
+          },{
+            name: 'barr2',
+            type: 'text',
+            nullable: true
+          }]
+        }],
+        comments: [{
+          type: 'table',
+          target: 'baz',
+          content: 'qux'
+        },{
+          type: 'column',
+          target: 'baz1',
+          content: 'quxx'
+        }]
+      }
+    })
+  ).toEqual(
+    `
+BEGIN;
+
+CREATE SCHEMA api IF NOT EXISTS;
+
+CREATE TYPE foo AS ENUM (
+  'foo1', 'foo2'
+);
+
+CREATE TABLE bar IF NOT EXISTS (
+  bar1 INTEGER PRIMARY KEY,
+  bar2 TEXT NOT NULL
+);
+CREATE TABLE barr IF NOT EXISTS (
+  barr1 INTEGER PRIMARY KEY,
+  barr2 TEXT NOT NULL
+);
+
+COMMENT ON TABLE baz IS 'qux';
+COMMENT ON COLUMN baz1 IS 'quxx';
+
+COMMIT;
+`
+  )
 })

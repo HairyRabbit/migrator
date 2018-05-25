@@ -4,7 +4,7 @@
  * @flow
  */
 
-import type { Options, Column, Comment } from './'
+import type { Options, Column, Comment, Type } from './'
 
 /**
  * Additional columns
@@ -104,12 +104,104 @@ export function renderComment(comment: Comment): string {
     )
   }
 
-  return `COMMENT ON ${type} ${target} IS '${content}';`
+  return `COMMENT ON ${type.toUpperCase()} ${target} IS '${content}';`
 }
 
+/**
+ * Types
+ */
+
+export function renderType(type: Type): string {
+  const { name, enums } = type
+
+  if(!name) {
+    throw new Error(
+      `Render enum type name was required`
+    )
+  } else if(!enums || !Array.isArray(enums)) {
+    throw new Error(
+      `Render enum type enums was required and must be a array list`
+    )
+  } else if(!enums.length) {
+    console.warn(
+      `Render enum type for ${name} values was blank`
+    )
+  }
+
+  /**
+   * string type need warp with qoute
+   */
+  const es = 'string' === typeof enums[0]
+        ? enums.map(s => `'${s}'`)
+        : enums
+
+  const enmusStr = es.length
+        ? '(\n  ' + es.join(', ') + '\n)'
+        : '()'
+
+  return `CREATE TYPE ${name} AS ENUM ${enmusStr};`
+}
+
+/**
+ * Tables
+ */
+export function renderTable(table: Table): string {
+  const { name, columns } = table
+
+  if(!name) {
+    throw new Error(
+      `Render table type name was required`
+    )
+  } else if(!columns || !Array.isArray(columns)) {
+    throw new Error(
+      `Render table type columns was required and must be a array list`
+    )
+  } else if(!columns.length) {
+    console.warn(
+      `Render table type for ${name} values was blank`
+    )
+  }
+
+  const cols = columns.map(makeColumn)
+  const columnsStr = cols.length
+        ? '(\n  ' + cols.join(',\n  ') + '\n)'
+        : '()'
+
+  return `CREATE TABLE ${name} IF NOT EXISTS ${columnsStr};`
+}
+
+/**
+ * Render
+ */
 
 export default function render(options: Options): string {
+  const { schema, metas = {} } = options || {}
+  const { tables = [], types = [], comments = [] } = metas || {}
 
+  const sql = []
+  const pusher = a => sql.push(a)
+
+  /**
+   * create schema
+   */
+  sql.push(`CREATE SCHEMA ${schema} IF NOT EXISTS;`)
+
+  /**
+   * create types
+   */
+  types.length && sql.push(types.map(renderType).join('\n'))
+
+  /**
+   * create tables
+   */
+  tables.length && sql.push(tables.map(renderTable).join('\n'))
+
+  /**
+   * create comments
+   */
+  comments.length && sql.push(comments.map(renderComment).join('\n'))
+
+  return `\nBEGIN;\n\n${sql.join('\n\n')}\n\nCOMMIT;\n`
 }
 
 
@@ -122,7 +214,7 @@ function makeColumn(column: Column): string {
     unique,
     default: defaultValue,
     check
-  } = column
+  } = column || {}
 
   if(!name) {
     throw new Error(
@@ -138,27 +230,15 @@ function makeColumn(column: Column): string {
 
   const constraint = []
 
-  if(primaryKey) {
-    constraint.push(`PRIMARY KEY`)
-  }
+  primaryKey && constraint.push(`PRIMARY KEY`)
+  nullable && constraint.push(`NOT NULL`)
+  unique && constraint.push(`UNIQUE`)
+  defaultValue && constraint.push(`DEFAULT ${defaultValue}`)
+  check && constraint.push(`CHECK ${check}`)
 
-  if(nullable) {
-    constraint.push(`NOT NULL`)
-  }
-
-  if(unique) {
-    constraint.push(`UNIQUE`)
-  }
-
-  if(defaultValue) {
-    constraint.push(`DEFAULT ${defaultValue}`)
-  }
-
-  if(check) {
-    constraint.push(`CHECK ${check}`)
-  }
-
-  const constraintStr = constraint.length ? ' ' + constraint.join(' ') : ''
+  const constraintStr = constraint.length
+        ? ' ' + constraint.join(' ')
+        : ''
 
   return `${name} ${type.toUpperCase()}${constraintStr}`
 }
