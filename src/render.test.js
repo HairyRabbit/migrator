@@ -21,7 +21,7 @@ test('should throw when without name or type', () => {
       id: {
         type: 'text',
         primaryKey: false,
-        nullable: true,
+        nullable: false,
         default: 1
       }
     })
@@ -32,7 +32,7 @@ test('should throw when without name or type', () => {
       id: {
         name: 'id',
         primaryKey: false,
-        nullable: true,
+        nullable: false,
         default: 1
       }
     })
@@ -69,7 +69,7 @@ test('should render id column with id options', () => {
         name: 'id',
         type: 'text',
         primaryKey: false,
-        nullable: true,
+        nullable: false,
         default: 1
       }
     })
@@ -339,7 +339,7 @@ test('should render table with empty columns', () => {
       columns: []
     })
   ).toEqual(
-    `CREATE TABLE foo IF NOT EXISTS ();`
+    `CREATE TABLE foo ();`
   )
 })
 
@@ -354,7 +354,7 @@ test('should render table with column', () => {
     })
   ).toEqual(
     `\
-CREATE TABLE foo IF NOT EXISTS (
+CREATE TABLE foo (
   bar INTEGER
 );`
   )
@@ -374,7 +374,7 @@ test('should render table with columns', () => {
     })
   ).toEqual(
     `\
-CREATE TABLE foo IF NOT EXISTS (
+CREATE TABLE foo (
   bar INTEGER,
   baz TEXT
 );`
@@ -465,12 +465,12 @@ test('should render SQL strings', () => {
           enums: []
         }]
       }
-    })
+    }).sql
   ).toEqual(
     `
 BEGIN;
 
-CREATE SCHEMA api IF NOT EXISTS;
+CREATE SCHEMA api;
 
 CREATE TYPE foo AS ENUM ();
 
@@ -487,12 +487,12 @@ COMMIT;
           enums: ['bar', 'baz']
         }]
       }
-    })
+    }).sql
   ).toEqual(
     `
 BEGIN;
 
-CREATE SCHEMA api IF NOT EXISTS;
+CREATE SCHEMA api;
 
 CREATE TYPE foo AS ENUM (
   'bar', 'baz'
@@ -511,14 +511,14 @@ COMMIT;
           columns: []
         }]
       }
-    })
+    }).sql
   ).toEqual(
     `
 BEGIN;
 
-CREATE SCHEMA api IF NOT EXISTS;
+CREATE SCHEMA api;
 
-CREATE TABLE foo IF NOT EXISTS ();
+CREATE TABLE foo ();
 
 COMMIT;
 `
@@ -539,14 +539,14 @@ COMMIT;
           }]
         }]
       }
-    })
+    }).sql
   ).toEqual(
     `
 BEGIN;
 
-CREATE SCHEMA api IF NOT EXISTS;
+CREATE SCHEMA api;
 
-CREATE TABLE foo IF NOT EXISTS (
+CREATE TABLE foo (
   bar INTEGER,
   baz TEXT
 );
@@ -573,16 +573,16 @@ COMMIT;
           content: 'qux'
         }]
       }
-    })
+    }).sql
   ).toEqual(
     `
 BEGIN;
 
-CREATE SCHEMA api IF NOT EXISTS;
+CREATE SCHEMA api;
 
 CREATE TYPE foo AS ENUM ();
 
-CREATE TABLE bar IF NOT EXISTS ();
+CREATE TABLE bar ();
 
 COMMENT ON TABLE baz IS 'qux';
 
@@ -607,7 +607,7 @@ COMMIT;
           },{
             name: 'bar2',
             type: 'text',
-            nullable: true
+            nullable: false
           }]
         },{
           name: 'barr',
@@ -618,7 +618,7 @@ COMMIT;
           },{
             name: 'barr2',
             type: 'text',
-            nullable: true
+            nullable: false
           }]
         }],
         comments: [{
@@ -631,22 +631,22 @@ COMMIT;
           content: 'quxx'
         }]
       }
-    })
+    }).sql
   ).toEqual(
     `
 BEGIN;
 
-CREATE SCHEMA api IF NOT EXISTS;
+CREATE SCHEMA api;
 
 CREATE TYPE foo AS ENUM (
   'foo1', 'foo2'
 );
 
-CREATE TABLE bar IF NOT EXISTS (
+CREATE TABLE bar (
   bar1 INTEGER PRIMARY KEY,
   bar2 TEXT NOT NULL
 );
-CREATE TABLE barr IF NOT EXISTS (
+CREATE TABLE barr (
   barr1 INTEGER PRIMARY KEY,
   barr2 TEXT NOT NULL
 );

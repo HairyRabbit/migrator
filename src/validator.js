@@ -4,13 +4,13 @@
  * @flow
  */
 
-import type { Options } from './'
+import type { Model } from './'
 
-export default function valide(name: string, column: Column): ?string {
+export default function valide(name: string, column: Model): ?string {
   const {
     pattern,
     minimum,
-    maxumum,
+    maximum,
     exclusiveMinimum,
     exclusiveMaximum,
     minLength,
@@ -27,9 +27,9 @@ export default function valide(name: string, column: Column): ?string {
       cond.push(`${name} ${symbol} ${minimum}`)
     }
 
-    if(maxumum) {
+    if(maximum) {
       const symbol = exclusiveMinimum ? '<=' : '<'
-      cond.push(`${name} ${symbol} ${maxumum}`)
+      cond.push(`${name} ${symbol} ${maximum}`)
     }
 
     if(cond.length) {
@@ -44,6 +44,9 @@ export default function valide(name: string, column: Column): ?string {
       cond.push(`char_length(${name}) >= ${minLength}`)
     }
 
+    /**
+     * @TODO: duplicate with data type
+     */
     if(maxLength) {
       cond.push(`char_length(${name}) <= ${maxLength}`)
     }

@@ -5,6 +5,7 @@
  */
 
 import mapType from './type-mapper'
+import validate from './validator'
 import type { Options } from './'
 
 export default function generate(options: Options): Options {
@@ -60,8 +61,8 @@ export default function generate(options: Options): Options {
       softDelete: tsoftDelete,
       primaryKey: tprimaryKey,
       dataType,
-      check
-    } = table.additionalProperties || {}
+      check: dataCheck
+    } = item.additionalProperties || {}
 
     /**
      * add id column for primary key first
@@ -75,7 +76,7 @@ export default function generate(options: Options): Options {
        * map json type to data type, if not provide additionalProperties.dataType
        */
       const type = dataType || mapType(col, { schema, table, column })
-
+      const check = dataCheck || validate(column, col)
       /**
        * add types
        */
@@ -99,6 +100,7 @@ export default function generate(options: Options): Options {
         nullable: col.nullable,
         primaryKey: tprimaryKey,
         default: col.default,
+        unique: col.unique,
         check
       })
     }

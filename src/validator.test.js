@@ -19,7 +19,7 @@ test('should generate number checker', () => {
       type: 'integer',
       minimum: 42,
       exclusiveMinimum: true,
-      maxumum: 88,
+      maximum: 88,
       exclusiveMaximum: true,
     })
   ).toEqual(

@@ -4,7 +4,8 @@
  * @flow
  */
 
-import type { Options, Column, Comment, Type } from './'
+import { log, warn, fail } from '@rabbitcc/logger'
+import type { Options, Table, Column, Comment, Type } from './'
 
 /**
  * Additional columns
@@ -91,15 +92,18 @@ export function renderComment(comment: Comment): string {
   const { type, target, content } = comment || {}
 
   if(!type) {
-    throw new Error(
+    throw new Error(fail(
+      '[migrator.render]',
       'Render Comment type was required'
-    )
+    ))
   } else if(!target) {
-    throw new Error(
+    throw new Error(fail(
+      '[migrator.render]',
       'Render Comment target was required'
-    )
+    ))
   } else if(!content) {
-    console.warn(
+    warn(
+      '[migrator.render]',
       `Render Comment content on ${type} for ${target} was blank string`
     )
   }
@@ -167,15 +171,15 @@ export function renderTable(table: Table): string {
         ? '(\n  ' + cols.join(',\n  ') + '\n)'
         : '()'
 
-  return `CREATE TABLE ${name} IF NOT EXISTS ${columnsStr};`
+  return `CREATE TABLE ${name} ${columnsStr};`
 }
 
 /**
  * Render
  */
 
-export default function render(options: Options): string {
-  const { schema, metas = {} } = options || {}
+export default function render(options: Options): Options {
+  const { schema = 'api', metas = {} } = options || {}
   const { tables = [], types = [], comments = [] } = metas || {}
 
   const sql = []
@@ -184,7 +188,7 @@ export default function render(options: Options): string {
   /**
    * create schema
    */
-  sql.push(`CREATE SCHEMA ${schema} IF NOT EXISTS;`)
+  sql.push(`CREATE SCHEMA ${schema};`)
 
   /**
    * create types
@@ -201,7 +205,11 @@ export default function render(options: Options): string {
    */
   comments.length && sql.push(comments.map(renderComment).join('\n'))
 
-  return `\nBEGIN;\n\n${sql.join('\n\n')}\n\nCOMMIT;\n`
+  /**
+   * output
+   */
+  options.sql = `\nBEGIN;\n\n${sql.join('\n\n')}\n\nCOMMIT;\n`
+  return options
 }
 
 
@@ -230,10 +238,10 @@ function makeColumn(column: Column): string {
 
   const constraint = []
 
-  primaryKey && constraint.push(`PRIMARY KEY`)
-  nullable && constraint.push(`NOT NULL`)
-  unique && constraint.push(`UNIQUE`)
-  defaultValue && constraint.push(`DEFAULT ${defaultValue}`)
+  true === primaryKey && constraint.push(`PRIMARY KEY`)
+  false === nullable && constraint.push(`NOT NULL`)
+  true === unique && constraint.push(`UNIQUE`)
+  defaultValue && constraint.push(`DEFAULT ${String(defaultValue)}`)
   check && constraint.push(`CHECK ${check}`)
 
   const constraintStr = constraint.length
