@@ -8,19 +8,20 @@ import { parse as urlParse } from 'url'
 import { twarn as warn, fail } from '@rabbitcc/logger'
 import type { Connect, ConnectOptions } from './'
 
-/**
- * connect default values, read from evn variable first
- *
- * @link https://www.postgresql.org/docs/10/static/libpq-envars.html
- * @link https://node-postgres.com/features/connecting#environment-variables
- */
-const Default_Host = process.env.PGHOST || '127.0.0.1'
-const Default_Port = process.env.PGPORT || '5432'
-const Default_User = process.env.PGUSER || process.env.USER || 'postgres'
-const Default_Pass = process.env.PGPASSWORD || null
-const Default_DB   = process.env.PGDATABASE || process.env.USER || 'postgres'
-
 export default function parse(connect: Connect): ConnectOptions {
+  /**
+   * connect default values, read from evn variable first
+   *
+   * @link https://www.postgresql.org/docs/10/static/libpq-envars.html
+   * @link https://node-postgres.com/features/connecting#environment-variables
+   */
+  const Default_Host = process.env.PGHOST || '127.0.0.1'
+  const Default_Port = process.env.PGPORT || '5432'
+  const Default_User = process.env.PGUSER || process.env.USER || 'postgres'
+  const Default_Pass = process.env.PGPASSWORD || null
+  const Default_DB   = process.env.PGDATABASE || process.env.USER || 'postgres'
+
+
   if(undefined === connect) {
     return parse({})
   }

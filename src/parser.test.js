@@ -4,6 +4,16 @@
 
 import parse from './parser'
 
+beforeEach(() => {
+  delete process.env.PGUSER
+  delete process.env.PGPASSORD
+  delete process.env.PGHOST
+  delete process.env.PGPORT
+  delete process.env.PGDATABASE
+  delete process.env.USER
+})
+
+
 test('should return default connect string', () => {
   expect(
     parse().string
@@ -14,6 +24,7 @@ test('should return default connect string', () => {
 
 test('should parse connect string', () => {
   expect(
+
     parse('postgresql://foo:bar@baz:42/qux').string
   ).toEqual(
     'postgresql://foo:bar@baz:42/qux'
