@@ -113,7 +113,7 @@ if(file) {
 /**
  * run
  */
-promise.then(data => {
+export default promise.then(data => {
   run({
     schema,
     data,

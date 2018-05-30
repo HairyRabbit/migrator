@@ -1,6 +1,7 @@
 import path from 'path'
 import {
-  EnvironmentPlugin
+  EnvironmentPlugin,
+  BannerPlugin
 } from 'webpack'
 
 export default [{
@@ -50,6 +51,10 @@ export default [{
     new EnvironmentPlugin({
       NODE_ENV: false,
       DEBUG: false
+    }),
+    new BannerPlugin({
+      banner: '#!/usr/bin/env node',
+      raw: true
     })
   ],
   externals: [
