@@ -9,12 +9,72 @@ import render, {
   renderOperator,
   renderComment,
   renderType,
-  renderTable
+  renderTable,
+  makeColumn
 } from './render'
 
 /**
  * make column
  */
+test('should render column', () => {
+  expect(
+    makeColumn({
+      name: 'foo',
+      type: 'integer'
+    })
+  ).toEqual(
+    `foo INTEGER`
+  )
+})
+
+test('should render column with primay key', () => {
+  expect(
+    makeColumn({
+      name: 'foo',
+      type: 'integer',
+      primaryKey: true
+    })
+  ).toEqual(
+    `foo INTEGER PRIMARY KEY`
+  )
+})
+
+test('should render column with not null', () => {
+  expect(
+    makeColumn({
+      name: 'foo',
+      type: 'integer',
+      nullable: false
+    })
+  ).toEqual(
+    `foo INTEGER NOT NULL`
+  )
+})
+
+test('should render column with default values', () => {
+  expect(
+    makeColumn({
+      name: 'foo',
+      type: 'integer',
+      default: 'CURRENT_TIMESTAMP'
+    })
+  ).toEqual(
+    `foo INTEGER DEFAULT CURRENT_TIMESTAMP`
+  )
+})
+
+test('should render column with check', () => {
+  expect(
+    makeColumn({
+      name: 'foo',
+      type: 'integer',
+      check: 'bar'
+    })
+  ).toEqual(
+    `foo INTEGER CHECK (bar)`
+  )
+})
+
 test('should throw when without name or type', () => {
   expect(
     () => renderId({

@@ -213,7 +213,7 @@ export default function render(options: Options): Options {
 }
 
 
-function makeColumn(column: Column): string {
+export function makeColumn(column: Column): string {
   const {
     name,
     type,
@@ -242,7 +242,7 @@ function makeColumn(column: Column): string {
   false === nullable && constraint.push(`NOT NULL`)
   true === unique && constraint.push(`UNIQUE`)
   defaultValue && constraint.push(`DEFAULT ${String(defaultValue)}`)
-  check && constraint.push(`CHECK ${check}`)
+  check && constraint.push(`CHECK (${check})`)
 
   const constraintStr = constraint.length
         ? ' ' + constraint.join(' ')
