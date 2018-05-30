@@ -2,8 +2,17 @@ pipeline {
   agent any
   stages {
     stage('install') {
-      steps {
-        sh 'npm i'
+      parallel {
+        stage('install dependencies') {
+          steps {
+            sh 'npm i --verbose'
+          }
+        }
+        stage('install types') {
+          steps {
+            sh 'flow-typed install --verbose'
+          }
+        }
       }
     }
     stage('test') {
