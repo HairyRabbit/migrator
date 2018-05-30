@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('install') {
       steps {
-        sh 'npm ci'
+        sh 'npm i'
       }
     }
     stage('test') {
