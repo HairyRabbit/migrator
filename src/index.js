@@ -138,8 +138,8 @@ export type Options = {
   connobj?: ConnectOptions
 }
 
-const defaultOptions = {
-  schema: 'api',
+export const defaultOptions = {
+  schema: 'public',
   id: true,
   timestamp: true,
   operator: false,

@@ -61,6 +61,8 @@ export default [{
     'yargs',
     '@rabbitcc/logger',
     'get-stdin',
+    'js-yaml',
+    'glob',
     '../lib/migrator'
   ]
 }]

@@ -127,7 +127,8 @@ export function renderType(type: Type): string {
       `Render enum type enums was required and must be a array list`
     )
   } else if(!enums.length) {
-    console.warn(
+    warn(
+      '[migrator.render]',
       `Render enum type for ${name} values was blank`
     )
   }
@@ -161,7 +162,8 @@ export function renderTable(table: Table): string {
       `Render table type columns was required and must be a array list`
     )
   } else if(!columns.length) {
-    console.warn(
+    warn(
+      '[migrator.render]',
       `Render table type for ${name} values was blank`
     )
   }

@@ -1,7 +1,7 @@
 {
   "name": "@rabbitcc/migrator",
   "version": "0.1.0",
-  "description": "Migrator tools",
+  "description": "A Migrator tools transform api json schema to PostgreSQL",
   "main": "lib/index.js",
   "scripts": {
     "start": "npm run build && node bin/cli.js",
@@ -42,6 +42,8 @@
   "dependencies": {
     "@rabbitcc/logger": "^0.1.0",
     "get-stdin": "^6.0.0",
+    "glob": "^7.1.2",
+    "js-yaml": "^3.11.0",
     "pg": "^7.4.3",
     "yargs": "^11.0.0"
   },
