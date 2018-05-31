@@ -1,11 +1,15 @@
 pipeline {
   agent any
+  environment {
+    CI = 'true'
+    NODE_ENV = 'test'
+  }
   stages {
     stage('install') {
       parallel {
         stage('install dependencies') {
           steps {
-            sh 'npm i --verbose'
+            sh 'npm ci --verbose'
           }
         }
         stage('install types') {
@@ -13,6 +17,11 @@ pipeline {
             sh 'flow-typed install --verbose'
           }
         }
+      }
+    }
+    stage('build') {
+      steps {
+        sh 'npm run build'
       }
     }
     stage('test') {
@@ -27,11 +36,6 @@ pipeline {
             sh 'npm run type'
           }
         }
-      }
-    }
-    stage('build') {
-      steps {
-        sh 'npm run build'
       }
     }
   }
