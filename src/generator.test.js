@@ -38,10 +38,15 @@ test('should return generate object', () => {
           columns: [{
             name: 'id',
             type: 'serial',
-            primaryKey: true
+            primaryKey: true,
           },{
             name: 'bar',
-            type: 'integer'
+            type: 'integer',
+            primaryKey: undefined,
+            nullable: false,
+            default: undefined,
+            check: undefined,
+            unique: undefined
           },{
             name: 'create_at',
             type: 'timestamp',

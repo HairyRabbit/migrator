@@ -97,7 +97,7 @@ export default function generate(options: Options): Options {
       collects.push({
         name: column,
         type,
-        nullable: col.nullable,
+        nullable: col.nullable || false,
         primaryKey: tprimaryKey,
         default: col.default,
         unique: col.unique,
