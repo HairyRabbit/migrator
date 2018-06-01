@@ -29,6 +29,7 @@ export default function read(filePath: string): string {
       case 'json':
         return JSON.parse(fs.readFileSync(filePath, 'utf-8'))
       case 'js':
+        // $FlowFixMe
         const mod = __non_webpack_require__(filePath)
         delete __non_webpack_require__.cache[filePath]
         return mod.default || mod

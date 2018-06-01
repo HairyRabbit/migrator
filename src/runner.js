@@ -12,7 +12,9 @@ export default function exec(options: Options): void {
   const { schema, connobj: connect, sql } = options
 
   if(!connect) {
-    throw new Error(fail('[migrate]Unparsed connect object'))
+    throw new Error(fail('[migrate.connect]Unparsed connect object'))
+  } else if(!schema) {
+    throw new Error(fail('[migrate.connect]Unknow schema'))
   }
   /**
    * connect postgres server
