@@ -1,6 +1,6 @@
 {
   "name": "@rabbitcc/migrator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A Migrator tools transform api json schema to PostgreSQL",
   "main": "lib/index.js",
   "scripts": {
