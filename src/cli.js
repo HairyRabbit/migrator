@@ -131,7 +131,9 @@ getStdin().then(str => {
       data = files.reduce((acc, curr) => {
         const fileExt = path.extname(curr)
         const fileName = path.basename(curr, fileExt)
+        console.log(fileExt, fileName, read(curr))
         acc[fileName] = read(curr)
+        return acc
       }, {})
 
     } else {
